@@ -19,8 +19,8 @@ country_id_map = {
   'UK': 1,
   'DE': 2,
   'DK': 3,
-  'HU': 4,
-  'SE': 5,
+  'HU': 5,
+  'SE': 4,
   'IT': 6,
   'PO': 7,
   'NL': 8
