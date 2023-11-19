@@ -18,6 +18,7 @@ def main(args):
   df = clean_data(df)
   df = compute_aggregates(df)
   df = drop_renewable_energy_columns(df)
+  df = df[['Time'] + sorted([col for col in df.columns if col != 'Time'])]
   df = compute_labels(df)
   print(df)
   save_df(df, filePath=os.path.abspath(args.output_file))
@@ -40,9 +41,6 @@ def clean_data(df):
   df_resampled = df_resampled.reset_index(drop=True)
   # And recreate the Time column with the new intervals
   df_resampled['Time'] = startTime + pd.to_timedelta(df_resampled.index, unit='H')
-
-  # Reorder the columns so that Time is the first one
-  df_resampled = df_resampled[['Time'] + sorted([col for col in df_resampled.columns if col != 'Time'])]
 
   # Fill all the gaps at the middle, beggining or end of the data with linear interpolation (average of the previous and next values)
   df_resampled.interpolate(method='linear', limit_direction='both', inplace=True)
