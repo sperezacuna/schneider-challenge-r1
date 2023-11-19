@@ -2,6 +2,28 @@ countries = [ 'SP', 'UK', 'DE', 'DK', 'HU', 'SE', 'IT', 'PO', 'NL' ]
 
 renewable_energies = [ 'B01', 'B09', 'B10', 'B11', 'B12', 'B13', 'B15', 'B16', 'B18', 'B19' ]
 
+fuel_types = {
+  'BIOMASS': 'B01',
+  'CCGT': 'B03',
+  'COAL': 'B05',
+  'INTELEC': 'nil',
+  'INTEW': 'nil',
+  'INTFR': 'nil',
+  'INTIFA2': 'nil',
+  'INTIRL': 'nil',
+  'INTNED': 'nil',
+  'INTNEM': 'nil',
+  'INTNSL': 'nil',
+  'INTVKL': 'nil',
+  'NPSHYD': 'B11',
+  'NUCLEAR': 'B14',
+  'OCGT': 'B07',
+  'OIL': 'B06',
+  'OTHER': 'B20',
+  'PS': 'B10',
+  'WIND': 'B18'
+}
+
 regions = {
   'SP': '10YES-REE------0',
   'UK': '10Y1001A1001A92E',
@@ -19,8 +41,8 @@ country_id_map = {
   'UK': 1,
   'DE': 2,
   'DK': 3,
-  'HU': 4,
-  'SE': 5,
+  'HU': 5,
+  'SE': 4,
   'IT': 6,
   'PO': 7,
   'NL': 8
