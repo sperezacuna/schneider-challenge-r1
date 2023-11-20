@@ -1,18 +1,8 @@
-# Table of Contents <a id="top"></a>
-1. [About The Project](#about)
-2. [Getting Started](#getstart)
-3. [Execution ](#execution)
-4. [Data Ingestion](#ingest)
-5. [Insights [1/8]](#ins1)
-6. [Data Processing ](#proc)
-7. [Insights [2/8]](#ins2)
-8. [Model](#model)
-9. [Contributing ](#Contributing )
-10. [License]( #license)
-11. [Contact](#contact) 
-
 ## About The Project <a id="about"></a>
-This prediction model is designed to forecast the European country that will likely have the highest surplus of green energy in the next hour. The project was developed in accordance with the specifications for the challenge of the [EcoForecast Contest: Revolutionizing Green Energy Surplus Prediction in Europe](https://nuwe.io/dev/competitions/schneider-electric-european-2023/ecoforecast-revolutionizing-green-energy-surplus-prediction-in-europe). The generated model provides a label indicating which of the listed countries will have the most surplus of green energy, determined by the formula max(Total green energy generated - Load). 
+This prediction model is designed to forecast the European country that will likely have the highest surplus of green energy in the next hour. The project was developed in accordance with the specifications for the challenge of the [EcoForecast Contest: Revolutionizing Green Energy Surplus Prediction in Europe](https://nuwe.io/dev/competitions/schneider-electric-european-2023/ecoforecast-revolutionizing-green-energy-surplus-prediction-in-europe). The generated model provides a label indicating which of the listed countries will have the most surplus of green energy, determined by the following formula:
+$$
+\text{Max Surplus} = \max(\text{Total Green Energy Generated} - \text{Load})
+$$
 
 The main functionality of the project can be summarized as follows:
 * Gather all the data from ENTSO-E.
@@ -28,19 +18,33 @@ The main functionality of the project can be summarized as follows:
 * Save the results as a json file.
 * Evaluate the performance of the model and calculate insights.
 
-In case the previous full web description of the challenge is not available, you can check it [here](/doc/challenge_description.pdf). IMPORTAR
+In case the previous full web description of the challenge is not available, you can check it [here](/doc/challenge_description.pdf). 
 
 ### Built Using
 Base technologies:
 * [Python](https://www.python.org/)
-* [Tensorflow](https://www.tensorflow.org/)
+* [Pandas](https://pandas.pydata.org/)
 * [Keras](https://keras.io/)
 
 Additional dependencies:
 * [NumPy](https://numpy.org/)
-* [Pandas](https://pandas.pydata.org/)
+* [Tensorflow](https://www.tensorflow.org/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
+
+# Table of Contents <a id="index"></a>
+
+1. [About The Project](#top)
+2. [Getting Started](#getstart)
+3. [Execution ](#execution)
+4. [Data Ingestion](#ingest)
+5. [Insights [1/8]](#ins1)
+6. [Data Processing ](#proc)
+7. [Insights [2/8]](#ins2)
+8. [Model](#model)
+9. [Contributing ](#Contributing )
+10. [License]( #license)
+11. [Contact](#contact) 
 
 ## Getting Started <a id="getstart"></a>
 Given that [Python 3.9+](https://www.python.org/downloads/) and [pip](https://pip.pypa.io/en/stable/) are installed and correctly configured in the system, and that you have [CUDA-capable hardware](https://developer.nvidia.com/cuda-gpus) installed, you may follow these steps.
@@ -57,19 +61,17 @@ Given that [Python 3.9+](https://www.python.org/downloads/) and [pip](https://pi
 ```bash
 git clone git@github.com:sperezacuna/schneider-challenge-r1.git
 ```
-2. Create a new [pip environment](https://docs.python-guide.org/dev/virtualenvs/), with all dependecies installed.
+
+2. Create Python [virtual environment](https://docs.python.org/3/library/venv.html) and activate it.
 
 ```bash
-NOOOOOOOOOOOO
-$ mkvirtualenv project_folder
-pip create --name <env> --file requirements.txt
+python -m venv env
+source env/bin/activate 
 ```
 
-3. Activate it.
-
+3. Install all required dependencies.
 ```bash
-NOOOOOOOOOOOOOOOOOOO
-pip activate <env>
+pip install -r requirements.txt
 ```
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -78,37 +80,40 @@ pip activate <env>
 TODO
 
 ### Flow of the code
-This project is meant to be run through a single script, [run_pipeline.sh](../scripts/run_pipeline.sh). The script does the following:
-1.	 Activates the  [conda environment](https://docs.conda.io/projects/conda/en/latest/commands/create.html).
+  
+The main inference pipeline of this project is designed to be executed through a single script, [run_pipeline.sh](../scripts/run_pipeline.sh). This script performs the following tasks*:
+1.	 Activates the [virtual environment](https://docs.python.org/3/library/venv.html).
 2.	 Installs the [requirements](../requirements.txt).
 3.	 Runs the [data ingestion script](../src/data_ingestion.py).
 4.	 Runs the [data processing script](../src/data_processing.py).
 5.  Runs the [model prediction script](../src/model_prediction.py).
 
+*In addition to the tasks mentioned earlier, the script also collects pertinent statistical information between stages (TODOOOO). Furthermore, the [doc/charts.py](doc/charts.py) file provides additional crucial insights, but it is not executed from the *run_pipeline.sh* script.
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Data Ingestion <a id="ingest"></a>
 ### Download ENTSO-E data
-First of all,  the program requests the  data for each of the countries to the ENTSO-E API and stores it in "partial" dataframes, one per country and column, in dictionaries. 
+First of all, the program requests the data for each of the countries to the ENTSO-E API and stores it in *partial* dataframes, one per country and column, in dictionaries. 
 
-!!!!!!!!!!!!! CAMBIAR          !This is done in two different methods, one to get the load, other to get all the energies,.
+!!!!!!!!!!!!! CAMBIAR  (TODOOOO)         !This is done in two different methods, one to get the load, other to get all the energies,.
 
-Given that the API permits downloading either one data type per request or all available data for a country in a single request, to minimize the number of requests made, we opted to download all the data at once. Subsequently, we will process the entirety of the data, confident that handling 10 MB of data is manageable for everyone.
+Given that the API permits downloading either one data type per request or all available data for a country in a single request, to minimize the number of requests made, we opted to download all the data at once. Subsequently, we will process the entirety of the data, confident that handling 10 MB of data is manageable.
 
-It's important to note that the API imposes a restriction on the data request, allowing a maximum of 1-year periods. In cases where the specified period exceeds 1 year (i.e., (end date - start date) > 1 year), the script will constrain the request to cover only 1 year beyond the start date.
+It's important to note that the API imposes a restriction on the data request, allowing a maximum of 1-year periods. For requests where the specified period surpasses 1 year (i.e., (end date - start date) > 1 year), the script dynamically adjusts the end date to ensure it never exceeds the 1-year limit in the request. This adaptive approach allows our script to retrieve data from periods exceeding 1 year.
 
-You can check all the relevant data that we use, such as tokens or countries, in the [src/constants.py](src/constants.py) file.
 
 ### Download Elexon data [OPTIONAL] [[More info]](#ukreason)
-In case you run the script with the only_entsoe setting, you may skip this section. 
+In case you run the script with the *only_entsoe* setting, you may skip this section. 
 
-If you choose to run it without the only_entsoe option (which is both the default and recommended), the data for the UK will not be fetched from ENTSO-E but rather from Elexon. The subsequent process remains identical to the one previously explained for ENTSO-E. However, it's crucial to consider the following particularities:
-- Different energy codes are used: biomass is represented by B01, ps (pumped storage) is denoted as B10, and wind combines B18 and B19. Since there isn't empirical data to distribute wind separately, and given that it doesn't affect the final model, we just add it all up to B18.
+If you choose to run it without the *only_entsoe* option (which is both the default and recommended), the data for the UK will not be fetched from ENTSO-E but rather from [Elexon](https://developer.data.elexon.co.uk/). The subsequent process remains identical to the one previously explained for ENTSO-E. However, it's crucial to consider the following particularities:
+- Different energy codes are used: biomass is represented by B01, PS (pumped storage) is denoted as B10, and wind combines B18 and B19. Since there isn't empirical data to distribute wind separately, and given that it doesn't affect the final model, we just add it all up to B18.
 -   The API restricts load data requests to 28 days or less.
 -   To obtain a 30-minute sampling, requests for generated energy must not exceed a duration of 14 days.
+- You can check all the relevant data that we use, such as tokens or countries, in the [src/constants.py](src/constants.py) file.
 
 ### Concatenate partial dataframes
-After downloading the partial dataframes the program concatenates them. The resulting dataframe will have only one ID and timestamp, being ordered by both.EXPLAINNN
+After downloading the partial dataframes the program first renames the columns with the country code and parameter (e.g. ES_B10). After, the program concatenates all the *partial* dataframes into one, all at once, based on the temporal axis.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -143,7 +148,7 @@ Setting aside ENTSO-E considerations, we have opted to incorporate B10 - Hydro P
 In case you want to modify the final list, you can do  it by editing the [src/constants.py](src/constants.py) file.
 
 ### Drop all non renewable energy columns
-First of all, the program loads the dataframe with all the data ingested. Given the presence of both integers and floats in the dataset, we found it necessary to standardize the data for proper treatment. We decided to use floats because the neural model we use requires this type of data, although it weights more.
+Given the coexistence of both integers and floats in the dataset, and considering the necessity for data homogeneity imposed by the neural network, we have chosen to exclusively use floats. This decision is implemented to prevent any potential loss of values that could occur if integers were employed. It is crucial to acknowledge that, considering the use of a substantial unit for measurement, every decimal holds considerable significance in representing a substantial amount of energy.
 
 Following this, the program contrasts the columns of the dataset with the previously created list of renewable energies, generating a new list of the columns that we must drop. Lastly, it drops them all at once.
 
@@ -161,7 +166,13 @@ To facilitate subsequent exploratory analysis, we have opted to calculate the su
 Once the total green energy generated by each country is calculated, the specific information about each energy source becomes redundant. Consequently, we drop all the columns that are in the green energy list.
 
 ### Label calculation
-Last but not least, we create a new dataframe to compute the label. Then we fill each row with the index of the country who has the most (green energy - load) in the countries array. Since we try to predict which country will have the most surplus in the next hour, we do a basic 1-shift operation. Then, we drop the last row since we do not have the necesary data to calculate the label. Lastly, we concatenate the main dataframe with the labels dataframe.
+Last but not least, we create a new dataframe to compute the label. Then we fill each row with the index of the country who has the most surplus in the countries array. The surplus is calculated using the following formula:
+$$
+\text{Max Surplus} = \max(\text{Total Green Energy Generated} - \text{Load})
+$$
+
+
+Since we try to predict which country will have the most surplus in the next hour, we do a basic 1-shift operation. Then, we drop the last row since we do not have the necesary data to calculate the label. Lastly, we concatenate the main dataframe with the generated labels dataframe.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -183,7 +194,9 @@ Let's summarise what data we have lost:
 Upon scrutinizing the total amount of green energy generated per country, a notable observation emerges: both the UK and HU contribute significantly less to renewable energy generation. While the smaller size of HU (approximately 1/5th that of Spain) can account for its comparatively lower output, the UK, being substantial in size, appears capable of producing more.
 
 ![Total load per country](doc/total_load_entsoe.png)
-Upon reviewing the total load per country, anomalies have come to light, with the UK once again presenting surprises.<p align="right">(<a href="#top">back to top</a>)</p>
+Upon reviewing the total load per country, anomalies have come to light, with the UK once again presenting surprises. It seems implausible for the United Kingdom to exhibit nearly no energy load in comparison to the other countries.
+
+<p align="right">(<a href="#top">back to top</a>)</p>
 
 ### Dealing with UK anomaly <a id="ukreason"></a>
 If we examine the data we currently have, it is possible to appreciate that the UK is lacking a significant amount of data. Also, the values provided for both generation and load are surprisingly low.
@@ -191,7 +204,7 @@ If we examine the data we currently have, it is possible to appreciate that the 
 The [challenge](https://nuwe.io/dev/competitions/schneider-electric-european-2023/ecoforecast-revolutionizing-green-energy-surplus-prediction-in-europe) states that the goal of this hackaton is:
 >to create a model capable of predicting the country (from a list of nine) that will have the most surplus of green energy in the next hour.
 >
-Delving deeper into the data, we observed that the majority of entries were interpolated. In order to achieve a precise and realistic solution it's mandatory to understand why are there so many missing data? Is the information that we have accurate?
+Delving deeper into the data, we observed that the majority of entries were interpolated. In order to achieve a precise and realistic solution it's mandatory to understand why there are so many missing data points? Is the information that we have accurate?
 
 
 After conducting extensive research, we identified the root cause of the problem; following June 15th 2021, due to Brexit, both BZN and GB ceased all data publication on ENTSO-E. The data we previously ingested was solely from Northern Ireland. You can verify this information on the [official publication](https://commission.europa.eu/strategy-and-policy/relations-non-eu-countries/relations-united-kingdom/eu-uk-trade-and-cooperation-agreement_en). For a more comprehensive understanding of the situation, you may refer to the following sites:
@@ -204,7 +217,7 @@ Since Nuwe explicitly states in the objective section that we must consider the 
 2. Make an estimation: Discarded as there is not a single piece of data that corresponds to the UK as a whole.
 3. Gather the missing information from another source.
 
-Since there is a [platform](https://developer.data.elexon.co.uk/) that offers the data for the UK publicly, we firmly believe this is the best option and, therefore, we chose it. However, it is possible to not use this data if you use the option "only_entsoe", in case this is "not allowed" by any non-stated rule.
+Since there is a [platform](https://developer.data.elexon.co.uk/) that offers the data for the UK publicly, we firmly believe this is the best option and, therefore, we chose it. However, **it is possible to not use this data** if you use the option *only_entsoe*, in case this is "not allowed" by any non-stated rule.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
