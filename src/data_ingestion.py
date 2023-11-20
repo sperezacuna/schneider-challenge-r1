@@ -9,7 +9,7 @@ from dateutil.relativedelta import relativedelta
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
-from utils import load_config
+from utils import load_config, inspect_dataframe
 from parse_utils import xmls_to_df_dict, jsons_to_df_dict
 from constants import countries, regions
 
@@ -48,6 +48,7 @@ def main(args):
   df = complete_df(df)
   print(df)
   save_df(df, filePath=os.path.abspath(args.output_file))
+  inspect_dataframe(df, args.output_file) # Monitors csv content
 
 def get_region_load_df_from_entsoe(url, token, region, period_start, period_end):
   params = {
