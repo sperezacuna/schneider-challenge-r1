@@ -2,8 +2,6 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 
-from constants import country_id_map
-
 class DatasetWrapper:
   def __init__(self, df_csv, batch_size, window_size, countries_in_use, country_hyperparams, phase="inference"):
     self.df = self._load_df(filePath=df_csv)
