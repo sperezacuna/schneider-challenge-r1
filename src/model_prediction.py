@@ -4,6 +4,7 @@ import json
 import argparse
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from dataset_helpers import DatasetWrapper
 
@@ -11,13 +12,13 @@ def main(args):
   model = load_model(args.model_type, args.model_file)
   data = DatasetWrapper(
     df_csv=os.path.abspath(args.input_file),
-    batch_size=model.parameters.getint('BatchSize'),
-    window_size=model.parameters.getint('WindowSize'),
-    countries_in_use=model.parameters.get('CountriesInUse').split(','),
-    country_hyperparams=model.parameters.get('CountryHyperparams').split(','),
+    batch_size=model.batch_size,
+    window_size=model.window_size,
+    countries_in_use=model.countries_in_use,
+    country_hyperparams=model.country_hyperparams,
     phase="inference"
   )
-  save_predictions(model.predict(data),args.output_file)
+  save_predictions(model.predict(data), args.output_file)
 
 def load_model(model_type, model_path):
   if model_type == "recurrentLSTM":
@@ -57,7 +58,7 @@ if __name__ == "__main__":
     help='the path of the file where the inference data is be stored [default is data/test.csv]'
   )
   parser.add_argument(
-    '--output_file', '-p', type=str,
+    '--output_file', '-o', type=str,
     default=os.path.join(os.path.dirname(__file__), f'../predictions/predictions.json'),
     help='the path of the file where the predictions made by the model will be stored [default is predictions/predictions.json]. The folder must exist'
   )
