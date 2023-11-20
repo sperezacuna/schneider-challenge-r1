@@ -34,19 +34,18 @@ Additional dependencies:
 
 # Table of Contents <a id="index"></a>
 
-1. [About The Project](#top)
-2. [Getting Started](#getstart)
-3. [Execution ](#execution)
-4. [Data Ingestion](#ingest)
-5. [Insights [1/3]](#ins1)
-6. [Data Processing ](#proc)
-7. [Insights [2/3]](#ins2)
-8. [Model](#model)
-9. [Results](#results)
-10. [Insights [3/3]](#ins3)
-11. [Contributing ](#Contributing )
-12. [License]( #license)
-13. [Contact](#contact) 
+1. [Getting Started](#getstart)
+2. [Execution ](#execution)
+3. [Data Ingestion](#ingest)
+4. [Insights [1/3]](#ins1)
+5. [Data Processing ](#proc)
+6. [Insights [2/3]](#ins2)
+7. [Model](#model)
+8. [Results](#results)
+9. [Insights [3/3]](#ins3)
+10. [Contributing ](#Contributing )
+11. [License]( #license)
+12. [Contact](#contact) 
 
 ## Getting Started <a id="getstart"></a>
 Given that [Python 3.9+](https://www.python.org/downloads/) and [pip](https://pip.pypa.io/en/stable/) are installed and correctly configured in the system, and that you have [CUDA-capable hardware](https://developer.nvidia.com/cuda-gpus) installed, you may follow these steps.
@@ -124,13 +123,14 @@ After downloading the partial dataframes the program first renames the columns w
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Insights [1/3] <a id="ins1"></a>
-Let's check what data we have ingested:
-- We have 8XXX rows.
-- We have XX colums, 
+Let's check what data we have ingested. This time we will only take into consideration the information contained in the [df_sizes](doc/df_sizes.txt) file, but take in mind that we have a lot of statistical files in the [doc](/doc) folder that will be used in the next Insights sections!
 
-TODO IN SCRIPT:
--  How many data points have we ingested?
-- new source
+Despite having 2 ways of collecting the sources, we always end up with the same format dataframe since we convert the Elexon *fuel_type* into the BXX fields of ENTSO-E. Particularly:
+- We have 35 040 rows. The maximum sampling frequency is 15 min, therefore, for a interval of 365 days, we should have 4 * 24 * 365 = 35040 rows, so it confirms we did it well.
+- We have 227 columns. Since we downloaded more than necessary data in order to make only one request to the API, this is expected.
+- Consequently, we have a total of 7 954 080 fields. To efficiently handle this amount of data, we use [Pandas vectorization](https://medium.com/analytics-vidhya/understanding-vectorization-in-numpy-and-pandas-188b6ebc5398), so there is no significant delay due to data processing. Also, note that most of the columns will be simply [dropped](https://sparkbyexamples.com/pandas/pandas-drop-columns-examples/), which is nearly instantaneous regardless of the dataset's size.
+- When using the ENTSO-E  data, the file size is 17.5KB, nothing preoccupant.
+- When using the Elexon data for the UK and the ENTSO-E for the rest of the countries the file size is 21.1KB. The increase of 3.6KB is a result of incorporating information about missing UK fields, but it continues to be of insignificant concern.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -189,15 +189,20 @@ We developed a custom LSTM model that necessitates a 4-dimensional input shape, 
 
 ## Insights [2/3] <a id="ins2"></a>
 
-TODO IN SCRIPT:
--   Do we loose any data during data processing?
--   Which data have we lost?
--   Why did we loose it? However, it is up to you to define the specific measures you are monitoring.
+First of all, let's check what we have in the *processed_data.csv* files:
+- Number of Rows: 8759. This is derived from the original 35 040 rows divided by 4 (as we transitioned from 15-minute intervals to 1-hour intervals), excluding the last row where calculating the label is not feasible. Since the math adds up, we did it well.
+- Number of Columns: 30. This includes ID, Time, Label, and data for 9 countries, each with Load, Total Green Energy, and Surplus.
+- Consequently, we have a total of 262 770 fields. A stunning 96,7% decrease, with 7 691 310 fields discarded! 
+- Both file sizes have been significantly reduced, now occupying approximately 2KB each. This represents around 90% reduction in size.
 
-Let's summarise what data we have lost:
-- We lost 3/4 of the rows since originally we had 15 minute intervals and now we have 1 hour intervals. Additionally, notice that the 1/4 of the remaining rows may have changed since we did the mean to calculate it. If for the hour interval we had no values, it will be... ESPECIFICAR CADA CASO 
+Now, let's break down the causes:
+- We lost 3/4 of the rows due to the shift from 15-minute to 1-hour intervals.  Additionally, notice that the remaining rows may have changed since we did the mean to calculate it. The additional lost row was dropped because we had no way to calculate the correct next hour label. This implies a reduction of more than 75% in the overall size of the dataframe.
 - We lost all the specific green energy columns (10 sources * 9 countries = 90 less columns), but we gained one total green energy column per country (9 columns). This means that we reduced the information contained in 90 columns in only 9, a 90% downsize! 
--  We lost all the not green related columns
+- We lost all the not green related columns, except ID, Time and the country load related columns.
+- We inserted the both, the green energies columns and the surplus columns, for each country. Although the surplus column is not necessary (and we will not pass it to our model), since it is helpful since we will do a lot of statistical operations in the following steps. We also inserted the label column.
+
+
+We will now proceed with an exploratory analysis, utilizing the charts generated by our dedicated [script](doc/charts.py).
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ### Exploratory analysis [1]  (Only ENTSO-E data)
@@ -267,7 +272,7 @@ You may notice that we incorporate a window in our approach. The rationale behin
 
 There's no need for concern regarding look-ahead bias, as we ensure that we neither train the model using the test data nor incur any bias. **We just ask for a series of predictions and discard all the responses except the last one.** Additionally, you won't lose the first "window" of rows; if there is no data, we simply send a row of zeros. The class responsible for managing this process is [Data Wrapper](#wrapper).
 
-### Ciclyc data <a id="circles"></a>
+### Cyclical data <a id="circles"></a>
 A Neural Network lacks inherent understanding of time; when using dates, the machine perceives them as numerical values. Challenges arise when attempting to predict cyclical data using timestamps because machines struggle to discern patterns due to variations such as:
 
 -   Not all months have the same duration.
@@ -299,7 +304,7 @@ We take into account that all months have 31 days, recognizing that there might 
  <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Insights [3/3] <a id="ins3"></a>
-### Exploratory analysis [3] (Result analysis)
+### Exploratory analysis [3] (Results analysis)
 
  <p align="right">(<a href="#top">back to top</a>)</p>
 
