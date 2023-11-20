@@ -38,13 +38,15 @@ Additional dependencies:
 2. [Getting Started](#getstart)
 3. [Execution ](#execution)
 4. [Data Ingestion](#ingest)
-5. [Insights [1/8]](#ins1)
+5. [Insights [1/3]](#ins1)
 6. [Data Processing ](#proc)
-7. [Insights [2/8]](#ins2)
+7. [Insights [2/3]](#ins2)
 8. [Model](#model)
-9. [Contributing ](#Contributing )
-10. [License]( #license)
-11. [Contact](#contact) 
+9. [Results](#results)
+10. [Insights [3/3]](#ins3)
+11. [Contributing ](#Contributing )
+12. [License]( #license)
+13. [Contact](#contact) 
 
 ## Getting Started <a id="getstart"></a>
 Given that [Python 3.9+](https://www.python.org/downloads/) and [pip](https://pip.pypa.io/en/stable/) are installed and correctly configured in the system, and that you have [CUDA-capable hardware](https://developer.nvidia.com/cuda-gpus) installed, you may follow these steps.
@@ -88,7 +90,11 @@ The main inference pipeline of this project is designed to be executed through a
 4.	 Runs the [data processing script](../src/data_processing.py).
 5.  Runs the [model prediction script](../src/model_prediction.py).
 
-*In addition to the tasks mentioned earlier, the script also collects pertinent statistical information between stages (TODOOOO). Furthermore, the [doc/charts.py](doc/charts.py) file provides additional crucial insights, but it is not executed from the *run_pipeline.sh* script.
+*In addition to the tasks mentioned earlier, the script also collects pertinent statistical information between stages (TODOOOO). 
+
+There are two other scripts that you should consider:
+-  [charts.py](doc/charts.py), that provides additional crucial insights, but it is not executed from the *run_pipeline.sh* script.
+- [model_training.py](src/model_training.py), that trains the model. This script can be execute via the *run_pipeline.sh* script, but it is not done by default. Use the --option for that (TODOOOOOOOOO)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -110,14 +116,14 @@ If you choose to run it without the *only_entsoe* option (which is both the defa
 - Different energy codes are used: biomass is represented by B01, PS (pumped storage) is denoted as B10, and wind combines B18 and B19. Since there isn't empirical data to distribute wind separately, and given that it doesn't affect the final model, we just add it all up to B18.
 -   The API restricts load data requests to 28 days or less.
 -   To obtain a 30-minute sampling, requests for generated energy must not exceed a duration of 14 days.
-- You can check all the relevant data that we use, such as tokens or countries, in the [src/constants.py](src/constants.py) file.
+- You can check all the relevant data that we use, such as countries, in the [src/constants.py](src/constants.py) file. The tokens are storaged in the [src/config/config.ini](src/config/config.ini) file.
 
 ### Concatenate partial dataframes
 After downloading the partial dataframes the program first renames the columns with the country code and parameter (e.g. ES_B10). After, the program concatenates all the *partial* dataframes into one, all at once, based on the temporal axis.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-## Insights [1/8] <a id="ins1"></a>
+## Insights [1/3] <a id="ins1"></a>
 Let's check what data we have ingested:
 - We have 8XXX rows.
 - We have XX colums, 
@@ -171,12 +177,17 @@ $$
 \text{Max Surplus} = \max(\text{Total Green Energy Generated} - \text{Load})
 $$
 
-
 Since we try to predict which country will have the most surplus in the next hour, we do a basic 1-shift operation. Then, we drop the last row since we do not have the necesary data to calculate the label. Lastly, we concatenate the main dataframe with the generated labels dataframe.
+
+### Dataframe splitting
+Now that we have all the dataset, and given that there is a rule that  forces us to split in 80/20 for traing/teststing, we decided to WHUWEHUWEHUWEHUW
+
+### Batch preparation
+We developed a custom LSTM model that necessitates a 4-dimensional input shape, thereby it requires additional data processing. For more detailed information, please refer to the model's [training section about handling the data](#wrapper). **It contains crucial details regarding data processing that are essential for a comprehensive understanding of our solution.**
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-## Insights [2/8] <a id="ins2"></a>
+## Insights [2/3] <a id="ins2"></a>
 
 TODO IN SCRIPT:
 -   Do we loose any data during data processing?
@@ -184,7 +195,7 @@ TODO IN SCRIPT:
 -   Why did we loose it? However, it is up to you to define the specific measures you are monitoring.
 
 Let's summarise what data we have lost:
-- We lost 3/4 of the rows since originally we had 15 minute intervals and now we have 1 hour intervals. Additionaly, notice that the 1/4 of the remaining rows may have changed since we did the mean to calculate it. If for the hour interval we had no values, it will be... ESPECIFICAR CADA CASO 
+- We lost 3/4 of the rows since originally we had 15 minute intervals and now we have 1 hour intervals. Additionally, notice that the 1/4 of the remaining rows may have changed since we did the mean to calculate it. If for the hour interval we had no values, it will be... ESPECIFICAR CADA CASO 
 - We lost all the specific green energy columns (10 sources * 9 countries = 90 less columns), but we gained one total green energy column per country (9 columns). This means that we reduced the information contained in 90 columns in only 9, a 90% downsize! 
 -  We lost all the not green related columns
 <p align="right">(<a href="#top">back to top</a>)</p>
@@ -221,7 +232,7 @@ Since there is a [platform](https://developer.data.elexon.co.uk/) that offers th
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-### Exploratory analysis [2]  (ENTSO-E & Elexon data)
+### Exploratory analysis [2]  (ENTSO-E & Elexon data) <a id="exp2"></a>
 ![Corrected total load](doc/total_load_with_uk.png)
 The UK anomaly has been successfully resolved using the Elexon API to fetch the info for the UK.
 
@@ -234,11 +245,63 @@ This graphic shows the mean of the hourly surplus per country, with one standard
 -   Approximately 95% falls within two standard deviations.
 -   Approximately 99.7% falls within three standard deviations.
 
-Hence, taking in consideration two standard deviations, it can be concluded that any country has the potential to lead in terms of surplus. However,  the first three (DK, SE, and HU) are more likely to exhibit the higher surplus.
+Hence, taking in consideration two standard deviations, it can be concluded that any country has the potential to lead in terms of surplus. However,  the first three (DK, SE, and HU) are more likely to exhibit the highest surplus.
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Model <a id="model"></a>
-<p align="right">(<a href="#top">back to top</a>)</p>
+After carefully considering our prediction goals, we determined that both [ARIMA](https://en.wikipedia.org/wiki/Autoregressive_integrated_moving_average) and [LSTM](https://en.wikipedia.org/wiki/Long_short-term_memory) could serve as excellent models. However, this [study](https://www.sciencedirect.com/science/article/pii/S1877050922013382#:~:text=The%20longer%20the%20data%20window,1.8%20times%20better%20than%20LSTM) suggests that LSTM significantly outperforms ARIMA when it comes to predict next-step results.
+
+### Neural Network Structure
+Given the high customizability of neural networks, it is imperative to provide a detailed explanation of our solution:
+![LSTM Structure](doc/lstm_structure.png)
+
+The rationale behind this structure is to individually process the values of green energy and load per country. This approach minimizes noise and yields more accurate conclusions, a critical consideration for a model with a high standard deviation, as determined in the [previous exploratory analysis](#exp2).
+
+Following the processing of data for each country, the network consolidates the individual conclusions into one. Leveraging [backpropagation](https://en.wikipedia.org/wiki/Backpropagation), the model is capable of predicting the appropriate label for each input.
+
+### Batch structure & Windows <a id="batch"></a>
+The batch structure can be summarized as follows:
+![Batch Structure](doc/batch_structure.png)
+
+You may notice that we incorporate a window in our approach. The rationale behind this is that we don't task our model to predict one result at a time. LSTM models tend to perform better when predicting consecutive rows. Consequently, instead of solely predicting the current result, we instruct the network to predict both the current and the last (window) values. You can think that we are **"heating up" the machine**, so it works better. Despite its seemingly unconventional nature, this approach is surprisingly effective, as we have validated through experimentation.
+
+There's no need for concern regarding look-ahead bias, as we ensure that we neither train the model using the test data nor incur any bias. **We just ask for a series of predictions and discard all the responses except the last one.** Additionally, you won't lose the first "window" of rows; if there is no data, we simply send a row of zeros. The class responsible for managing this process is [Data Wrapper](#wrapper).
+
+### Ciclyc data <a id="circles"></a>
+A Neural Network lacks inherent understanding of time; when using dates, the machine perceives them as numerical values. Challenges arise when attempting to predict cyclical data using timestamps because machines struggle to discern patterns due to variations such as:
+
+-   Not all months have the same duration.
+-   The starting day of the week for each month may differ (the 1st day of the month can fall on any day of the week).
+-   Machines find it challenging to comprehend cyclical custom ranges, such as one hour after 23:00 being 00:00.
+
+Considering that both consumption and generation exhibit cyclical variations influenced by factors like solar exposure or heating usage, it becomes essential to incorporate time in a suitable manner. Our approach is to represent time as a circumference, wherein we depict a circle with as many points as the intervals present. For instance, in a 24-hour interval, we input a circle with 24 points. The class responsible for managing this process is [Data Wrapper](#wrapper). Since adopting this approach, we have observed approximately a XX% improvement* in results. (EL XXXXXXXX)
+
+*Based on our own F1-Score calculation. (TO DEVELOP)
+
+### Data Wrapper <a id="wrapper"></a>
+Our model structure requires a 4-dimension input shape, therefore, we concluded that the best option was create the [DatasetWrapper](src/dataset_helpers/dataset_wrapper.py) class. 
+
+This code serves two main purposes:
+- Divide the dataset in the necessary shapes, returning an iterable that can be used as input to the model.
+- Adapt the time structure to a format suitable for a machine learning model to predict and pseudo-comprehend its cyclical nature.
+
+For the data division and iterator generation, it is crucial to determine whether we are in the training or inference step.
+
+If we are in the training step, we invoke the static methods of the class from (???????). These methods load the _your_train.csv_ file, transform the datetimes into circular coordinates, and compose an iterator containing the necessary input data for model .
+
+In the case of the inference step, the class reads the _your_train.csv_ file, transforms the datetimes into circular coordinates, and returns the data in an iterator formatted as the [previously explained batch structure](#batch) states.  This process involves converting the entire training dataset into batches, dividing data into iterations, and further dividing iterations by countries. Each country contains multiple rows due to the incorporation of the window system.
+
+Concerning the computation of [circular coordinates](#circles) computation, circles can be expressed as sine and cosine functions. Therefore, it suffices to calculate the coordinates for each x and y axis based on the desired number of points.
+
+We take into account that all months have 31 days, recognizing that there might be a few *missing cyclic values*. In the worst-case scenario, we may have only 28 out of 31 values, which is far more preferable than having none at all.
+
+
+ <p align="right">(<a href="#top">back to top</a>)</p>
+
+## Insights [3/3] <a id="ins3"></a>
+### Exploratory analysis [3] (Result analysis)
+
+ <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Contributing <a id="contributing"></a>
 
@@ -254,7 +317,7 @@ This project has been developed in accordance with Schneider's and Nuwe's terms 
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-## Contact <a id="contact"></a>
+## Contact CHECK PROJECT STRUCTUREEEEEE <a id="contact"></a>
 
 Santiago Pérez Acuña - santiago@perezacuna.com
 
