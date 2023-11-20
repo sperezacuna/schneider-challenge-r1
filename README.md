@@ -103,7 +103,7 @@ First of all, the program requests the data for each of the countries to the ENT
 
 !!!!!!!!!!!!! CAMBIAR  (TODOOOO)         !This is done in two different methods, one to get the load, other to get all the energies,.
 
-Given that the API permits downloading either one data type per request or all available data for a country in a single request, to minimize the number of requests made, we opted to download all the data at once. Subsequently, we will process the entirety of the data, confident that handling 10 MB of data is manageable.
+Given that the API permits downloading either one data type per request or all available data for a country in a single request, to minimize the number of requests made, we opted to download all the data at once. Subsequently, we will process the entirety of the data, confident that handling 20 MB of data is manageable.
 
 It's important to note that the API imposes a restriction on the data request, allowing a maximum of 1-year periods. For requests where the specified period surpasses 1 year (i.e., (end date - start date) > 1 year), the script dynamically adjusts the end date to ensure it never exceeds the 1-year limit in the request. This adaptive approach allows our script to retrieve data from periods exceeding 1 year.
 
@@ -129,8 +129,8 @@ Despite having 2 ways of collecting the sources, we always end up with the same 
 - We have 35 040 rows. The maximum sampling frequency is 15 min, therefore, for a interval of 365 days, we should have 4 * 24 * 365 = 35040 rows, so it confirms we did it well.
 - We have 227 columns. Since we downloaded more than necessary data in order to make only one request to the API, this is expected.
 - Consequently, we have a total of 7 954 080 fields. To efficiently handle this amount of data, we use [Pandas vectorization](https://medium.com/analytics-vidhya/understanding-vectorization-in-numpy-and-pandas-188b6ebc5398), so there is no significant delay due to data processing. Also, note that most of the columns will be simply [dropped](https://sparkbyexamples.com/pandas/pandas-drop-columns-examples/), which is nearly instantaneous regardless of the dataset's size.
-- When using the ENTSO-E  data, the file size is 17.5KB, nothing preoccupant.
-- When using the Elexon data for the UK and the ENTSO-E for the rest of the countries the file size is 21.1KB. The increase of 3.6KB is a result of incorporating information about missing UK fields, but it continues to be of insignificant concern.
+- When using the ENTSO-E  data, the file size is 17.1MB, nothing preoccupant.
+- When using the Elexon data for the UK and the ENTSO-E for the rest of the countries the file size is 20.6MB. The increase of 3.5MB is a result of incorporating information about missing UK fields, but it continues to be of insignificant concern.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -193,7 +193,7 @@ First of all, let's check what we have in the *processed_data.csv* files:
 - Number of Rows: 8759. This is derived from the original 35 040 rows divided by 4 (as we transitioned from 15-minute intervals to 1-hour intervals), excluding the last row where calculating the label is not feasible. Since the math adds up, we did it well.
 - Number of Columns: 30. This includes ID, Time, Label, and data for 9 countries, each with Load, Total Green Energy, and Surplus.
 - Consequently, we have a total of 262 770 fields. A stunning 96,7% decrease, with 7 691 310 fields discarded! 
-- Both file sizes have been significantly reduced, now occupying approximately 2KB each. This represents around 90% reduction in size.
+- Both file sizes have been significantly reduced, now occupying approximately 2.1MB each. This represents around 90% reduction in size.
 
 Now, let's break down the causes:
 - We lost 3/4 of the rows due to the shift from 15-minute to 1-hour intervals.  Additionally, notice that the remaining rows may have changed since we did the mean to calculate it. The additional lost row was dropped because we had no way to calculate the correct next hour label. This implies a reduction of more than 75% in the overall size of the dataframe.
