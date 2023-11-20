@@ -6,6 +6,7 @@ import pandas as pd
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
+from utils import inspect_dataframe
 from constants import (
   countries,
   renewable_energies,
@@ -22,6 +23,7 @@ def main(args):
   df = compute_labels(df)
   print(df)
   save_df(df, filePath=os.path.abspath(args.output_file))
+  inspect_dataframe(df, args.output_file) # Monitors csv content
 
 def load_df(filePath):
   df = pd.read_csv(filePath, index_col=0)
