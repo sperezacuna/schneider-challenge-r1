@@ -40,7 +40,7 @@ echo "Requirements installed."
 
 # Run the data ingestion script
 echo "Starting data ingestion..."
-python $script_dir/../src/data_ingestion.py --start-time $start_date --end-time $end_date --output_file $raw_data_file
+python $script_dir/../src/data_ingestion.py --start_time $start_date --end_time $end_date --output_file $raw_data_file
 echo "Finished data ingestion."
 
 # Run the data processing script
