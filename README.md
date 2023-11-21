@@ -1,3 +1,4 @@
+
 ## About The Project <a id="about"></a>
 This prediction model is designed to forecast the European country that will likely have the highest surplus of green energy in the next hour. The project was developed in accordance with the specifications for the challenge of the [EcoForecast Contest: Revolutionizing Green Energy Surplus Prediction in Europe](https://nuwe.io/dev/competitions/schneider-electric-european-2023/ecoforecast-revolutionizing-green-energy-surplus-prediction-in-europe). The generated model provides a label indicating which of the listed countries will have the most surplus of green energy, determined by the following formula:
 $$
@@ -53,7 +54,7 @@ Additional dependencies:
 
 ## Getting Started <a id="getstart"></a>
 
-Given that [Python 3.11+](https://www.python.org/downloads/) and [pip](https://pip.pypa.io/en/stable/) are installed and correctly configured in the system, and that you have [CUDA-capable hardware](https://developer.nvidia.com/cuda-gpus) installed, you may follow these steps.
+Given that [Python 3.11+](https://www.python.org/downloads/) and [pip](https://pip.pypa.io/en/stable/) are installed and correctly configured in the system, and that you have [CUDA-capable hardware](https://developer.nvidia.com/cuda-gpus) installed, you may follow these steps. It is recommended to have a minimum of 9 GB of VRAM.
 
 ### Prerequisites
 
@@ -85,8 +86,15 @@ pip install -r requirements.txt
 
 ## Execution <a id="execution"></a>
 ### How to execute
-TODO
-
+1. Place a valid token in the [src/config/config.ini](src/config/config.ini) file.
+2. Execute the script:
+```bash
+./run_pipeline.sh start_date end_date raw_data_file model_file test_data_file predictions_file
+```
+3. Alternatively, you can execute the script using the default settings (**recommended**):
+```
+./run_default.sh
+```
 ### Flow of the code
   
 The main inference pipeline of this project is designed to be executed through a single script, [run_pipeline.sh](../scripts/run_pipeline.sh). This script performs the following tasks*:
@@ -114,7 +122,7 @@ It's important to note that the API imposes a restriction on the data request, a
 
 
 ### Download Elexon data [OPTIONAL] [[More info]](#ukreason)
-In case you run the script with the *--only_entsoe* setting, you may skip this section. 
+In case you run the ingestion script with the *--only_entsoe* setting, you may skip this section. 
 
 If you choose to run it without the *--only_entsoe* option (which is both the default and recommended), the data for the UK will not be fetched from ENTSO-E but rather from [Elexon](https://developer.data.elexon.co.uk/). The subsequent process remains identical to the one previously explained for ENTSO-E. However, it's crucial to consider the following particularities:
 
@@ -183,11 +191,12 @@ $$
 \text{Max Surplus} = \max(\text{Total Green Energy Generated} - \text{Load})
 $$
 
-Since we try to predict which country will have the most surplus in the next hour, we do a basic _1-shift_ operation. Then, we drop the last row since we do not have the necesary data to calculate the label. Lastly, we concatenate the main dataframe with the generated labels dataframe.
+Since we try to predict which country will have the most surplus in the next hour, we do a basic _1-shift_ operation. Then, we drop the last row since we do not have the necessary data to calculate the label. Lastly, we concatenate the main dataframe with the generated labels dataframe.
 
 ### Dataframe splitting
-Now that we have all the dataset, and given that there is a rule that forces us to split in 80/20 for traing/validation, we decided to create a script that generates a [csv file](/data/test.csv) with the last 20% of the dataset just for testing purposes.
-Addicionally, we decided to delegate the resposibility of segregating that same validation split from the training data to a dataset wrapper object that handles model sample input.
+Now that we have all the dataset, and given that there is a rule that forces us to split in 80/20 for training/validation, we decided to create a script that generates a [csv file](/data/test.csv) with the last 20% of the dataset just for testing purposes.
+
+Additionally, we decided to delegate the responsibility of segregating that same validation split from the training data to a dataset wrapper object that handles the model sample input.
 
 ### Batch preparation
 We developed a custom LSTM model that necessitates a 4-dimensional input shape, thereby it requires additional data processing. For more detailed information, please refer to the [model's training section on data handling](#wrapper). **It contains crucial details regarding data processing that are essential for a comprehensive understanding of our solution.**
@@ -250,7 +259,7 @@ The UK anomaly has been successfully resolved using the Elexon API to fetch the 
 ![Surplus plotbox](doc/surplus_plotbox.png)
 Now, let's examine the statistical distribution of the surplus for each country. According to the chart, it seems that any country could be the possible winner, but let's dig in a bit deeper to get a more accurate explanation.  
 
-![Surplus STD](doc/surplus_std.png)
+![Surplus STD](doc/hour_surplus_std.png)
 This graphic shows the mean of the hourly surplus per country, with one standard deviation. Given that:
 - Approximately 68% of the data falls within one standard deviation of the mean [shadows printed in the chart].
 - Approximately 95% falls within two standard deviations.
@@ -274,9 +283,7 @@ Following the processing of data for each country, the network consolidates the 
 The batch structure can be summarized as follows:
 ![Batch Structure](doc/batch_structure.png)
 
-You may notice that we incorporate a window in our approach. The rationale behind this is that we don't task our model to predict one result at a time. LSTM models tend to perform better when predicting consecutive rows. Consequently, instead of solely predicting the current result, we instruct the network to predict both the current and the last (window) values. You can think that we are **"heating up" the machine**, so it works better. Despite its seemingly unconventional nature, this approach is surprisingly effective, as we have validated through experimentation.
-
-There's no need for concern regarding look-ahead bias, as we ensure that we neither train the model using the test data nor incur in any bias. **We just ask for a series of predictions and discard all the responses except the last one.** Additionally, you won't lose the first "window" of rows; if there is no data, we simply send a row of zeros. The class responsible for managing this process is [Data Wrapper](#wrapper).
+You may notice that we incorporate a window in our approach. The rationale behind this is that LSTM models use both, long and short term memory. The window is responsible for the short-term one.
 
 ### Cyclical data <a id="circles"></a>
 A Neural Network lacks inherent understanding of time; when using dates, the machine perceives them as numerical values. Challenges arise when attempting to predict cyclical data using timestamps because machines struggle to discern patterns due to variations such as:
@@ -288,16 +295,16 @@ A Neural Network lacks inherent understanding of time; when using dates, the mac
 Considering that both consumption and generation exhibit cyclical variations influenced by factors like solar exposure or heating usage, it becomes essential to incorporate time in a suitable manner. Our approach is to represent time as a circumference, wherein we depict a circle with as many points as the intervals present. For instance, in a 24-hour interval, we input a circle with 24 points. The class responsible for managing this process is [Data Wrapper](#wrapper)
 
 As a matter of fact, circles can be expressed as sine and cosine functions. Therefore, it suffices to calculate the coordinates for each x and y axis based on the desired number of points.
-
+ ![circle24](doc/circle_24_points.png)
 We take into account that all months have 31 days, recognizing that there might be a few *missing cyclic values*. In the worst-case scenario, we may have only 28 out of 31 values, which is far more preferable than having none at all.
 
 ### Data Wrapper <a id="wrapper"></a>
-Our model structure requires a 4-dimension input shape, therefore, we concluded that the best option was create the [DatasetWrapper](src/dataset_helpers/dataset_wrapper.py) class. 
+Our model structure requires a 4-dimension input shape, therefore, we concluded that the best option was to create the [DatasetWrapper](src/dataset_helpers/dataset_wrapper.py) class. 
 
 This code serves two main purposes:
 - Divide the dataset in the necessary shapes, returning an iterable that can be used as input to the model.
 - Adapt the time structure to a format suitable for a machine learning model to predict and pseudo-comprehend its cyclical nature.
-- Split training and validation data
+- Split training and validation data.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -307,6 +314,11 @@ This code serves two main purposes:
 
 ## Insights [3/3] <a id="ins3"></a>
 ### Exploratory analysis [3] (Results analysis)
+
+![Surplus STD](doc/predicted_labels.png)
+![Surplus STD](doc/correct_training_labels.png)
+![Surplus STD](doc/correct_test_labels.png)
+![Surplus STD](doc/monthly_surplus_std.png)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
