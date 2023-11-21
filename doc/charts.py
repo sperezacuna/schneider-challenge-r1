@@ -98,7 +98,7 @@ plt.show()
 plt.close()
 
 """--------------------------------------------------------------
-#EXPLORATORY ANALYSIS 2 - Insights [3/3]
+#EXPLORATORY ANALYSIS 3 - Insights [3/3]
 --------------------------------------------------------------
 """
 csv_file_path = "../data/processed_data.csv"
@@ -109,7 +109,7 @@ label_counts = df['label'].value_counts()
 
 plt.figure(figsize=(10, 6))
 plt.pie(label_counts, labels=label_counts.index, autopct='%1.1f%%', startangle=140)
-plt.title('Distribution of Labels (Training dataset)')
+plt.title('Distribution of Labels (training dataset)')
 
 plt.savefig('correct_training_labels.png')
 plt.show()
@@ -127,7 +127,7 @@ label_counts = df['label'].value_counts()
 
 plt.figure(figsize=(10, 6))
 plt.pie(label_counts, labels=label_counts.index, autopct='%1.1f%%', startangle=140)
-plt.title('Distribution of Labels')
+plt.title('Distribution of Labels (predicted labels)')
 
 plt.savefig('predicted_labels.png')
 plt.show()
@@ -142,7 +142,7 @@ label_counts = df['label'].value_counts()
 
 plt.figure(figsize=(10, 6))
 plt.pie(label_counts, labels=label_counts.index, autopct='%1.1f%%', startangle=140)
-plt.title('Distribution of Labels (Training dataset)')
+plt.title('Distribution of Labels (test dataset with labels)')
 
 plt.savefig('correct_test_labels.png')
 plt.show()

@@ -313,9 +313,11 @@ This code serves two main purposes:
 
 <div>  <img src="doc/predicted_labels.png" alt="Predicted labels" style="display:inline-block; margin-right:20px;">  <img src="doc/correct_training_labels.png" alt="Training labels distribution" style="display:inline-block;">  </div>
 When comparing the ratio of the labels predicted by our model with the ones we used for training, our model shows a slight tendency for the country 3, DK. Initially, we suspected a little bias in our model, but we decided to examine more the data for the labels we were trying to predict:
+
 ![Surplus STD](doc/correct_test_labels.png)
 
 Well... The data for the last two months exhibits a significant divergence from the rest of the period. Predicting it accurately in advance using only the information from the preceding 10 months could be challenging, however, our model was able to anticipate a bit of the tendency for the _Denmark winter surplus season_. This means that our model was not biased, but was anticipating it!
+
 ![Surplus Month STD](doc/monthly_surplus_std.png)
 
 As we were curious about why the label distribution differs significantly for the last 20% of the 2022 year, we opted to display the distribution of monthly surplus using the processed and labeled data. It becomes evident that the country who has the maximum surplus is a seasonal phenomenon. Consequently, relying on only 10 months for training and 2 for testing is not an optimal approach. Achieving more precision would necessitate several years of data. Unfortunately, adhering to the rules prevented us from pursuing this avenue.

@@ -1,0 +1,28 @@
+File analized: raw_data.csv
+Timestamp: 2023-11-20 22:24:24
+Number of Rows: 35040
+Number of Columns: 227
+----------------------------
+
+
+File analized: raw_data_only_entsoe.csv
+Timestamp: 2023-11-20 22:25:40
+Number of Rows: 35040
+Number of Columns: 227
+----------------------------
+
+
+File analized: processed_data.csv
+Timestamp: 2023-11-20 22:32:12
+Number of Rows: 8759
+Number of Columns: 30
+----------------------------
+
+
+File analized: processed_data_only_entsoe.csv
+Timestamp: 2023-11-20 22:35:55
+Number of Rows: 8759
+Number of Columns: 30
+----------------------------
+
+
