@@ -28,7 +28,7 @@ echo "Requirements installed."
 
 # Run the data ingestion script
 echo "Starting data ingestion..."
-python $script_dir/../src/data_ingestion.py --start-time 2022-01-01 --end-time 2023-01-01 --output_file "$script_dir/../data/raw_data.csv"
+python $script_dir/../src/data_ingestion.py --start_time 2022-01-01 --end_time 2023-01-01 --output_file "$script_dir/../data/raw_data.csv"
 echo "Finished data ingestion."
 
 # Run the data processing script
