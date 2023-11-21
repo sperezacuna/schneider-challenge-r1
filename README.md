@@ -316,6 +316,14 @@ Well... The data for the last two months exhibits a significant divergence from 
 As we were curious about why the label distribution differs significantly for the last 20% of the 2022 year, we opted to display the distribution of monthly surplus using the processed and labeled data. It becomes evident that the country who has the maximum surplus is a seasonal phenomenon. Consequently, relying on only 10 months for training and 2 for testing is not an optimal approach. Achieving more precision would necessitate several years of data. Unfortunately, adhering to the rules prevented us from pursuing this avenue.
 ![Surplus Month STD](doc/monthly_surplus_std.png)
 
+In any case and despite this, the model results (measured as the accuracy) casn be summarized as follows. Datapoints given for several threasholds of window size and LSTM units:
+
+|          | ws=7 | ws=14 | ws=30 | ws=90 | ws=120 |
+|----------|------|-------|-------|-------|--------|
+| LSTMu=20 | 0.76 | 0.78  | 0.72  | 0.80  | 0.77   |
+| LSTMu=40 | 0.74 | 0.82  | 0.83  | 0.86  | 0.84   |
+| LSTMu=80 | 0.77 | 0.8   | 0.84  | 0.91  | 0.89   |
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Contributing <a id="contributing"></a>
