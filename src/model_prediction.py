@@ -18,7 +18,8 @@ def main(args):
     country_hyperparams=model.country_hyperparams,
     phase="inference"
   )
-  save_predictions(model.predict(data), args.output_file)
+  predictions = model.predict(data)
+  save_predictions(predictions, args.output_file)
 
 def load_model(model_type, model_path):
   if model_type == "recurrentLSTM":
@@ -61,6 +62,11 @@ if __name__ == "__main__":
     '--output_file', '-o', type=str,
     default=os.path.join(os.path.dirname(__file__), f'../predictions/predictions.json'),
     help='the path of the file where the predictions made by the model will be stored [default is predictions/predictions.json]. The folder must exist'
+  )
+  parser.add_argument(
+    '--compare_ground_truth', '-c', type=str,
+    default='nil',
+    help='the path of the file where the ground truth is stored (to generate f1-score-macro) [default is nil]'
   )
   args = parser.parse_args()
   main(args)

@@ -47,7 +47,7 @@ class DatasetWrapper:
         continue_looping = False
   
   def _process_batch(self, start_index, end_index):
-    batch = np.empty(shape=(self.batch_size, len(self.countries_in_use), self.window_size, len(self.country_hyperparams)))
+    batch = np.empty(shape=(self.batch_size, len(self.countries_in_use), self.window_size, len(self.country_hyperparams)-1))
     if self.phase == "training":
       batch_labels = np.empty(shape=(self.batch_size, len(countries)))
     for batch_index, sample_index in enumerate(range(start_index, end_index)):
@@ -98,7 +98,7 @@ class DatasetWrapper:
   @staticmethod
   def _split_country_dfs(df, countries):
     return {
-      country_code: df[[col for col in df.columns if col.startswith(('Time', 'label', country_code))]]
+      country_code: df[[col for col in df.columns if col.startswith(('Time', country_code))]]
       for country_code in countries
     }
   

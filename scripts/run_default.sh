@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# Does not include model training
-
-# Monitors performance at each stage; particularly:
-#   How many data points have we ingested?
-#   Do we lose any data during data processing?
-#   Which data have we lost?
-#   Why did we lose it?
-#   Any other more specific measures
-
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # Create the virtual environment
@@ -31,17 +22,23 @@ else
 fi
 
 # Install the requirements
+echo "Installing requirements..."
 pip install -r $script_dir/../requirements.txt
 echo "Requirements installed."
 
 # Run the data ingestion script
-python $script_dir/../src/data_ingestion.py --output_file "$script_dir/../data/raw_data.csv"
+echo "Starting data ingestion..."
+python $script_dir/../src/data_ingestion.py --start-time 2022-01-01 --end-time 2023-01-01 --output_file "$script_dir/../data/raw_data.csv"
 echo "Finished data ingestion."
 
 # Run the data processing script
+echo "Starting data processing..."
 python $script_dir/../src/data_processing.py --input_file "$script_dir/../data/raw_data.csv" --output_file "$script_dir/../data/processed_data.csv"
 echo "Finished data processing."
 
 # Run the model prediction script
-python $script_dir/../src/model_prediction.py --model_type "recurrentLSTM" --model_file "$script_dir/../models/model.pkl" --input_file "$script_dir/../data/test.csv" --output_file "$script_dir/../predictions/predictions.csv"
+echo "Starting prediction..."
+python $script_dir/../src/model_prediction.py --model_type "recurrentLSTM" --model_file "$script_dir/../models/model.pkl" --input_file "$script_dir/../data/test.csv" --output_file "$script_dir/../predictions/predictions.json"
 echo "Finished inference."
+
+echo "Pipeline completed."

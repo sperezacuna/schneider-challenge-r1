@@ -54,7 +54,7 @@ class RecurrentLSTMModel():
     self.model = pickle.load(open(filePath, 'rb'))
   
   def _create_model(self):
-    input_shape = (len(self.countries_in_use), self.window_size, len(self.country_hyperparams))
+    input_shape = (len(self.countries_in_use), self.window_size, len(self.country_hyperparams)-1)
     input_layer = Input(shape=input_shape, batch_size=self.batch_size)
 
     per_country_nets = []
