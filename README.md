@@ -287,7 +287,7 @@ A Neural Network lacks inherent understanding of time; when using dates, the mac
 - The starting day of the week for each month may differ (the 1st day of the month can fall on any day of the week).
 - Machines find it challenging to comprehend cyclical custom ranges, such as one hour after 23:00 being 00:00.
 
-Considering that both consumption and generation exhibit cyclical variations influenced by factors like solar exposure or heating usage, it becomes essential to incorporate time in a suitable manner. Our approach is to represent time as a circumference, wherein we depict a circle with as many points as the intervals present. For instance, in a 24-hour interval, we input a circle with 24 points. The class responsible for managing this process is [Data Wrapper](#wrapper)
+Considering that both consumption and generation exhibit cyclical variations influenced by factors like solar exposure or heating usage, it becomes essential to incorporate time in a suitable manner. Our approach is to represent time as a circumference, wherein we depict a circle with as many points as the intervals present. For instance, in a 24-hour interval, we input a circle with 24 points. The class responsible for managing this process is [Data Wrapper](#wrapper).
 
 As a matter of fact, circles can be expressed as sine and cosine functions. Therefore, it suffices to calculate the coordinates for each x and y axis based on the desired number of points.
 
@@ -298,7 +298,7 @@ We take into account that all months have 31 days, recognizing that there might 
 ### Data Wrapper 
 Our model structure requires a 4-dimension input shape, therefore, we concluded that the best option was to create the [DatasetWrapper](src/dataset_helpers/dataset_wrapper.py) class. 
 
-This code serves two main purposes:
+This code serves three main purposes:
 - Divide the dataset in the necessary shapes, returning an iterable that can be used as input to the model.
 - Adapt the time structure to a format suitable for a machine learning model to predict and pseudo-comprehend its cyclical nature.
 - Split training and validation data.
@@ -334,8 +334,8 @@ This project has been developed in accordance with Schneider's and Nuwe's terms 
 
 ## Contact <a id="contact"></a>
 
-Santiago Pérez Acuña - santiago@perezacuna.com
+Santiago PÃ©rez AcuÃ±a - santiago@perezacuna.com - [LinkedIn](https://www.linkedin.com/in/sperezacuna/)
 
-Victor Figueroa Maceira - victorfigma@gmail.com
+Victor Figueroa Maceira - victorfigma@gmail.com - [LinkedIn](https://www.linkedin.com/in/victorfigma/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
