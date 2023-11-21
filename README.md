@@ -86,7 +86,7 @@ pip install -r requirements.txt
 1. Place a valid token in the [src/config/config.ini](src/config/config.ini) file.
 2. Execute the script:
 ```bash
-./scripts/run_pipeline.sh [start_date] [end_date] [raw_data_file] [model_file] [test_data_file] [predictions_file]
+./scripts/run_pipeline.sh [start_date] [end_date] [raw_data_file] [processed_data_file] [model_file] [test_data_file] [predictions_file]
 ```
 3. Alternatively, you can execute the script using the default settings (**recommended**):
 ```
@@ -316,7 +316,7 @@ Well... The data for the last two months exhibits a significant divergence from 
 As we were curious about why the label distribution differs significantly for the last 20% of the 2022 year, we opted to display the distribution of monthly surplus using the processed and labeled data. It becomes evident that the country who has the maximum surplus is a seasonal phenomenon. Consequently, relying on only 10 months for training and 2 for testing is not an optimal approach. Achieving more precision would necessitate several years of data. Unfortunately, adhering to the rules prevented us from pursuing this avenue.
 ![Surplus Month STD](doc/monthly_surplus_std.png)
 
-In any case and despite this, the model results (measured as the accuracy) casn be summarized as follows. Datapoints given for several threasholds of window size and LSTM units:
+In any case and despite this, the model results (measured as the accuracy) can be summarized as follows. Datapoints given for several threasholds of window size and LSTM units:
 
 |          | ws=7 | ws=14 | ws=30 | ws=90 | ws=120 |
 |----------|------|-------|-------|-------|--------|
