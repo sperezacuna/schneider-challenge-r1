@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from keras.utils import to_categorical
+
+from constants import countries
 
 class DatasetWrapper:
   def __init__(self, df_csv, batch_size, window_size, countries_in_use, country_hyperparams, phase="inference"):
@@ -20,36 +22,40 @@ class DatasetWrapper:
     self.country_dfs = self._split_country_dfs(self.df, self.countries_in_use)
     self.country_dfs = self._filter_unused_hyperparams(self.country_dfs, self.country_hyperparams)
   
-  def get_train_test_split_iterables(self, test_size=0.2):
-    training_size = int(self.df_length*(1-test_size))
+  def get_train_test_split_iterables(self, validation_split=0.2, repeat=False):
+    training_size = int(self.df_length*(1-validation_split))
     return (
-      self._get_iterable(0,             training_size ),
-      self._get_iterable(training_size, self.df_length)
+      self._get_iterable(0,             training_size , repeat),
+      self._get_iterable(training_size, self.df_length, repeat)
     )
 
-  def get_whole_dataset_iterable(self):
-    return self._get_iterable(0, self.df_length)
+  def get_whole_dataset_iterable(self, repeat=False):
+    return self._get_iterable(0, self.df_length, repeat)
 
-  def _get_iterable(self, it_start_index, it_end_index):
-    for batch_start_index in range(it_start_index+self.window_size, it_end_index+self.window_size-1, self.batch_size):
-      batch_end_index = batch_start_index + self.batch_size
-      if batch_end_index > it_end_index+self.window_size-1:
-        batch_end_index = it_end_index+self.window_size-1
-      if self.phase == "inference":
-        yield np.asarray(self._process_batch(batch_start_index, batch_end_index))
-      elif self.phase == "training":
-        yield self._process_batch(batch_start_index, batch_end_index)
+  def _get_iterable(self, it_start_index, it_end_index, repeat):
+    continue_looping = True
+    while continue_looping:
+      for batch_start_index in range(it_start_index+self.window_size, it_end_index+self.window_size-1, self.batch_size):
+        batch_end_index = batch_start_index + self.batch_size
+        if batch_end_index > it_end_index+self.window_size-1:
+          batch_end_index = it_end_index+self.window_size-1
+        if self.phase == "inference":
+          yield np.asarray(self._process_batch(batch_start_index, batch_end_index))
+        elif self.phase == "training":
+          yield self._process_batch(batch_start_index, batch_end_index)
+      if not repeat:
+        continue_looping = False
   
   def _process_batch(self, start_index, end_index):
-    batch = np.empty(shape=(end_index-start_index, len(self.countries_in_use), self.window_size, len(self.country_hyperparams)))
+    batch = np.empty(shape=(self.batch_size, len(self.countries_in_use), self.window_size, len(self.country_hyperparams)-1))
     if self.phase == "training":
-      batch_labels = np.empty(shape=(end_index-start_index))
+      batch_labels = np.empty(shape=(self.batch_size, len(countries)))
     for batch_index, sample_index in enumerate(range(start_index, end_index)):
       for country in self.countries_in_use:
         country_window = self.country_dfs[country].iloc[sample_index-self.window_size+1 : sample_index+1]
         batch[batch_index, self.countries_in_use.index(country)] = country_window.values.reshape(self.window_size, -1)
       if self.phase == "training":
-        batch_labels[batch_index] = self.df.iloc[sample_index]["label"]
+        batch_labels[batch_index] = to_categorical(int(self.df.iloc[sample_index]["label"]), num_classes=len(countries))
     if self.phase == "training":
       return batch, batch_labels
     else:
@@ -92,7 +98,7 @@ class DatasetWrapper:
   @staticmethod
   def _split_country_dfs(df, countries):
     return {
-      country_code: df[[col for col in df.columns if col.startswith(('Time', 'label', country_code))]]
+      country_code: df[[col for col in df.columns if col.startswith(('Time', country_code))]]
       for country_code in countries
     }
   

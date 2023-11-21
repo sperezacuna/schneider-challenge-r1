@@ -3,6 +3,7 @@ import sys
 import argparse
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from dataset_helpers import DatasetWrapper
 
@@ -10,10 +11,10 @@ def main(args):
   model = load_model(args.model_type)
   dataset = DatasetWrapper(
     df_csv=os.path.abspath(args.input_file),
-    batch_size=model.parameters.getint('BatchSize'),
-    window_size=model.parameters.getint('WindowSize'),
-    countries_in_use=model.parameters.get('CountriesInUse').split(','),
-    country_hyperparams=model.parameters.get('CountryHyperparams').split(','),
+    batch_size=model.batch_size,
+    window_size=model.window_size,
+    countries_in_use=model.countries_in_use,
+    country_hyperparams=model.country_hyperparams,
     phase="training"
   )
   model.train(dataset)
