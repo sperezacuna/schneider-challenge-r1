@@ -46,11 +46,10 @@ Additional dependencies:
 5. [Data Processing](#proc)
 6. [Insights [2/3]](#ins2)
 7. [Model](#model)
-8. [Results](#results)
-9. [Insights [3/3]](#ins3)
-10. [Contributing](#contributing)
-11. [License](#license)
-12. [Contact](#contact)
+8. [Insights [3/3]](#ins3)
+9. [Contributing](#contributing)
+10. [License](#license)
+11. [Contact](#contact)
 
 ## Getting Started <a id="getstart"></a>
 
@@ -89,11 +88,11 @@ pip install -r requirements.txt
 1. Place a valid token in the [src/config/config.ini](src/config/config.ini) file.
 2. Execute the script:
 ```bash
-./run_pipeline.sh start_date end_date raw_data_file model_file test_data_file predictions_file
+./scripts/run_pipeline.sh start_date end_date raw_data_file model_file test_data_file predictions_file
 ```
 3. Alternatively, you can execute the script using the default settings (**recommended**):
 ```
-./run_default.sh
+./scripts/run_default.sh
 ```
 ### Flow of the code
   
@@ -295,7 +294,8 @@ A Neural Network lacks inherent understanding of time; when using dates, the mac
 Considering that both consumption and generation exhibit cyclical variations influenced by factors like solar exposure or heating usage, it becomes essential to incorporate time in a suitable manner. Our approach is to represent time as a circumference, wherein we depict a circle with as many points as the intervals present. For instance, in a 24-hour interval, we input a circle with 24 points. The class responsible for managing this process is [Data Wrapper](#wrapper)
 
 As a matter of fact, circles can be expressed as sine and cosine functions. Therefore, it suffices to calculate the coordinates for each x and y axis based on the desired number of points.
- ![circle24](doc/circle_24_points.png)
+
+ <div align="center">  <img src="doc/circle_24_points.png" alt="circle24">  </div>
 We take into account that all months have 31 days, recognizing that there might be a few *missing cyclic values*. In the worst-case scenario, we may have only 28 out of 31 values, which is far more preferable than having none at all.
 
 ### Data Wrapper <a id="wrapper"></a>
@@ -308,18 +308,17 @@ This code serves two main purposes:
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
-## Results <a id="results"></a>
-
-<p align="right">(<a href="#top">back to top</a>)</p>
-
 ## Insights [3/3] <a id="ins3"></a>
 ### Exploratory analysis [3] (Results analysis)
 
-![Surplus STD](doc/predicted_labels.png)
-![Surplus STD](doc/correct_training_labels.png)
+<div>  <img src="doc/predicted_labels.png" alt="Predicted labels" style="display:inline-block; margin-right:20px;">  <img src="doc/correct_training_labels.png" alt="Training labels distribution" style="display:inline-block;">  </div>
+When comparing the ratio of the labels predicted by our model with the ones we used for training, our model shows a slight tendency for the country 3, DK. Initially, we suspected a little bias in our model, but we decided to examine more the data for the labels we were trying to predict:
 ![Surplus STD](doc/correct_test_labels.png)
-![Surplus STD](doc/monthly_surplus_std.png)
 
+Well... The data for the last two months exhibits a significant divergence from the rest of the period. Predicting it accurately in advance using only the information from the preceding 10 months could be challenging, however, our model was able to anticipate a bit of the tendency for the _Denmark winter surplus season_. This means that our model was not biased, but was anticipating it!
+![Surplus Month STD](doc/monthly_surplus_std.png)
+
+As we were curious about why the label distribution differs significantly for the last 20% of the 2022 year, we opted to display the distribution of monthly surplus using the processed and labeled data. It becomes evident that the country who has the maximum surplus is a seasonal phenomenon. Consequently, relying on only 10 months for training and 2 for testing is not an optimal approach. Achieving more precision would necessitate several years of data. Unfortunately, adhering to the rules prevented us from pursuing this avenue.
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 ## Contributing <a id="contributing"></a>
